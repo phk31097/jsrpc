@@ -1,15 +1,15 @@
 import * as ts from "typescript";
 import {
     ClassDeclaration,
-    InterfaceDeclaration, MethodDeclaration,
+    InterfaceDeclaration,
+    MethodDeclaration,
     ParameterDeclaration,
     Program,
-    PropertyDeclaration,
     SignatureKind,
     SyntaxKind,
     TypeNode
 } from "typescript";
-import {rpcClientInterfaceName, rpcServiceInterfaceName} from "./test";
+import {rpcClientInterfaceName} from "./code-generator";
 
 
 export function generateClientClass(itf: InterfaceDeclaration, program: Program): ClassDeclaration {
@@ -31,14 +31,6 @@ export function generateClientClass(itf: InterfaceDeclaration, program: Program)
         });
         const returnType: TypeNode = ts.factory.createTypeReferenceNode('Promise', [program.getTypeChecker().typeToTypeNode(signature.getReturnType(), undefined, undefined)!])
         const functionType = ts.factory.createFunctionTypeNode(undefined, typeParameters, returnType);
-
-        /*properties.push(ts.factory.createPropertyDeclaration(
-            ts.factory.createNodeArray([ts.factory.createToken(ts.SyntaxKind.PublicKeyword)]),
-            ts.factory.createIdentifier(property.name),
-            undefined,
-            functionType,
-            undefined
-        ));*/
 
         methodDeclarations.push(ts.factory.createMethodDeclaration(
             [ts.factory.createToken(ts.SyntaxKind.PublicKeyword)],
