@@ -20,7 +20,7 @@ export function generateClientClass(itf: InterfaceDeclaration, program: Program)
         const propertyType = program.getTypeChecker().getTypeOfSymbolAtLocation(property, itf);
         const signature = program.getTypeChecker().getSignaturesOfType(propertyType, SignatureKind.Call)[0];
 
-        const typeParameters: ParameterDeclaration[] = signature.getParameters().map(param => {
+        const parameterDeclarations: ParameterDeclaration[] = signature.getParameters().map(param => {
             return ts.factory.createParameterDeclaration(
                 undefined,
                 undefined,
@@ -30,7 +30,6 @@ export function generateClientClass(itf: InterfaceDeclaration, program: Program)
             )
         });
         const returnType: TypeNode = ts.factory.createTypeReferenceNode('Promise', [program.getTypeChecker().typeToTypeNode(signature.getReturnType(), undefined, undefined)!])
-        const functionType = ts.factory.createFunctionTypeNode(undefined, typeParameters, returnType);
 
         methodDeclarations.push(ts.factory.createMethodDeclaration(
             [ts.factory.createToken(ts.SyntaxKind.PublicKeyword)],
@@ -38,9 +37,8 @@ export function generateClientClass(itf: InterfaceDeclaration, program: Program)
             property.name,
             undefined,
             undefined,
-            [],
-
-            functionType,
+            parameterDeclarations,
+            returnType,
             ts.factory.createBlock([
                 ts.factory.createThrowStatement(
                     ts.factory.createNewExpression(

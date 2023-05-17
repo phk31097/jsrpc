@@ -1,11 +1,15 @@
 import * as ts from "typescript";
 import {EmitHint, Program} from "typescript";
 import {generateClientClass} from "./generate-client-class.fn";
+import {generateImport} from "./generate-import.fn";
+
+const fs = require('fs');
 
 export const rpcServiceInterfaceName = 'RpcService';
 export const rpcClientInterfaceName = 'RpcClient';
 
 interface RpcCodeGeneratorOptions {
+    baseDirectory: string;
     sharedDirectory: string;
     clientDirectory: string;
     serverDirectory: string;
@@ -15,14 +19,25 @@ export class RpcCodeGenerator {
 
     protected program: Program;
 
-    public constructor(private options?: RpcCodeGeneratorOptions) {
-        const fileNames = ['src/my-class.ts'];
-        this.program = ts.createProgram(fileNames, {
+    public constructor(protected options: RpcCodeGeneratorOptions) {
+        this.program = ts.createProgram(this.getSharedFiles(), {
             noEmitOnError: true,
             noImplicitAny: true,
             target: ts.ScriptTarget.ES5,
             module: ts.ModuleKind.CommonJS,
         });
+    }
+
+    public writeFile(fileName: string, content: string): void {
+        fs.writeFileSync(fileName, content);
+    }
+
+    public getSharedFiles(): string[] {
+        return fs.readdirSync([this.options.baseDirectory, this.options.sharedDirectory].join('/')).map((f: string) => [
+            this.options.baseDirectory,
+            this.options.sharedDirectory,
+            f
+        ].join('/'));
     }
 
     public generate(): void {
@@ -36,12 +51,17 @@ export class RpcCodeGenerator {
                         if (!interfaceType.getBaseTypes()?.map(type => type.getSymbol()?.name).includes(rpcServiceInterfaceName)) {
                             return;
                         }
+                        const clientFileName = sourceFile.fileName.replace(this.options.sharedDirectory, this.options.clientDirectory);
                         const printer = ts.createPrinter({ newLine: ts.NewLineKind.CarriageReturnLineFeed });
                         let file = ts.createSourceFile("generatedSource.ts", "", ts.ScriptTarget.ES2015);
-                        const generatedClass = generateClientClass(node, this.program);
-                        console.log('#######');
-                        console.log(printer.printNode(EmitHint.Unspecified, generatedClass, file));
-                        console.log('#######');
+
+                        const output = [
+                            generateImport(rpcClientInterfaceName, `../rpc-service`),
+                            generateImport(node.name.text, sourceFile.fileName.replace(this.options.baseDirectory, '..')),
+                            generateClientClass(node, this.program)
+                        ].map(n => printer.printNode(EmitHint.Unspecified, n, file));
+
+                        this.writeFile(clientFileName, output.join('\n'));
                     }
                 })
             })
