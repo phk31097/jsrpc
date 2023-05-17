@@ -3,6 +3,7 @@ import {EmitHint, Program} from "typescript";
 import {generateClientClass} from "./generate-client-class.fn";
 
 export const rpcServiceInterfaceName = 'RpcService';
+export const rpcClientInterfaceName = 'RpcClient';
 
 function compile(fileNames: string[], options: ts.CompilerOptions): void {
     let program: Program = ts.createProgram(fileNames, options);

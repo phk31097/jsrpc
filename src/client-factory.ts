@@ -20,7 +20,5 @@ class MyTestServiceClass implements MyTestService {
     }
 }
 
-new RpcClientFactory().getClient(MyTestServiceClass);
-
-const val = {} as RpcClient<MyTestService>;
-val.helloWorld('asdf').then(str => console.log(str));
+const client = new RpcClientFactory().getClient(MyTestServiceClass);
+client.helloWorld('asdf');
