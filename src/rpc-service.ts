@@ -1,5 +1,7 @@
 export interface RpcService {}
 
-export type RpcClient<Type> = {
-    [Properties in keyof Type]: Promise<Type>
+export type RpcClient<T extends RpcService> = {
+    [K in keyof T]: T[K] extends (...args: infer P) => infer R
+        ? (...args: P) => Promise<R>
+        : never;
 };
