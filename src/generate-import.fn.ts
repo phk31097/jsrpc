@@ -13,5 +13,5 @@ export function generateImport(element: string, location: string) {
                     ts.factory.createIdentifier(element)
                 )
             ])),
-        ts.factory.createStringLiteral(location));
+        ts.factory.createStringLiteral(location.replace('.ts', '')));
 }
