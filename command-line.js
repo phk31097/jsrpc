@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-const { RpcCodeGenerator } = require('./dist/code-generator');
-const { RpcServer } = require('./dist/rpc-server');
+const { RpcCodeGenerator } = require('./node_modules/@philippkoch/jsrpc/dist/code-generator');
+const { RpcServer } = require('./node_modules/@philippkoch/jsrpc/rpc-server');
 
 
 const GENERATE_CLASSES = 'generate-classes';
