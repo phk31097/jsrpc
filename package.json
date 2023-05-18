@@ -16,6 +16,9 @@
     "typescript": "^5.0.4"
   },
   "bin": {
-    "jsrpc": "./generate-classes.js"
-  }
+    "jsrpc": "./command-line.js"
+  },
+  "files": [
+    "dist/*"
+  ]
 }
