@@ -18,7 +18,7 @@ export class RpcServer {
                 const match = new RpcRequestMatcher(RpcServer.services).match(req.url!);
 
                 res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.write(JSON.stringify({response: 'Hello World'}));
+                res.write(JSON.stringify({response: (match.service[match.method] as Function)(...match.args)}));
             } catch (e: any) {
                 res.writeHead(400, { 'Content-Type': 'application/json' });
                 if ('message' in e) {
@@ -45,5 +45,7 @@ export class RpcServer {
 
 @rpc
 class RandomServiceClass {
-    myMethod(param1: string) {}
+    myMethod(param1: string) {
+        return 'Hello ' + param1;
+    }
 }

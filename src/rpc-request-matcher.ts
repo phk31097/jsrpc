@@ -9,26 +9,28 @@ export class RpcRequestMatcher {
 
     constructor(protected services: RpcService[]) {}
 
-    public match(url: string): {service: RpcService, method: string, args: any[]} {
+    public match<T extends RpcService>(url: string): {service: T, method: keyof T, args: any[]} {
         const [serviceString, methodAndParams] = url.substring(1).split(this.METHOD_SEPARATOR);
 
         if (!methodAndParams) {
             throw new Error('No method specified');
         }
 
-        const [method, paramString] = methodAndParams.split(this.QUERY_SEPARATOR);
+        const [methodString, paramString] = methodAndParams.split(this.QUERY_SEPARATOR);
         const args = paramString ? paramString.split(this.PARAM_SEPARATOR)
             .map(split => split.split(this.PARAM_VALUE_SEPARATOR)[1]) : [];
 
-        const service = this.services.find(service => service.constructor.name === serviceString);
+        const service = this.services.find(service => service.constructor.name === serviceString) as T | undefined;
 
         if (!service) {
             throw new Error(`No service '${serviceString}' found`);
         }
 
-        if (!(method in service)) {
-            throw new Error(`No method '${method}' found in '${service}'`)
+        if (!(methodString in service)) {
+            throw new Error(`No method '${methodString}' found in '${service}'`)
         }
+
+        const method: keyof T = methodString as keyof T;
 
         return {service, method, args};
     }
