@@ -7,6 +7,7 @@ const fs = require('fs');
 
 export const rpcServiceInterfaceName = 'RpcService';
 export const rpcClientInterfaceName = 'RpcClient';
+const PACKAGE_NAME = '@philippkoch/jsrpc';
 
 interface RpcCodeGeneratorOptions {
     baseDirectory: string;
@@ -56,7 +57,7 @@ export class RpcCodeGenerator {
                         let file = ts.createSourceFile("generatedSource.ts", "", ts.ScriptTarget.ES2015);
 
                         const output = [
-                            generateImport(rpcClientInterfaceName, `../rpc-service`),
+                            generateImport(rpcClientInterfaceName, PACKAGE_NAME),
                             generateImport(node.name.text, sourceFile.fileName.replace(this.options.baseDirectory, '..')),
                             generateClientClass(node, this.program)
                         ].map(n => printer.printNode(EmitHint.Unspecified, n, file));
