@@ -23,8 +23,6 @@
     "dist/*",
     "src/export/*"
   ],
-  "exports": {
-    "./": "./src/export"
-  },
+  "exports": "./src/export/index.ts",
   "type": "commonjs"
 }
