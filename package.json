@@ -23,6 +23,6 @@
     "dist/*",
     "src/export/*"
   ],
-  "exports": "./src/export/index.ts",
+  "exports": "./export/index.js",
   "type": "commonjs"
 }
