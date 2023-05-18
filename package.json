@@ -1,10 +1,11 @@
 {
   "name": "@philippkoch/jsrpc",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
     "build": "tsc",
+    "prepack": "npm run build",
     "run": "npm run build && node dist/test.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -19,6 +20,7 @@
     "jsrpc": "./command-line.js"
   },
   "files": [
-    "dist/*"
+    "dist/*",
+    "src/export/*.ts"
   ]
 }

@@ -1,5 +1,5 @@
-import {RpcCodeGenerator} from "./code-generator";
-import {RpcServer} from "./rpc-server";
+import {RpcCodeGenerator} from "./build/code-generator";
+import {RpcServer} from "./export/rpc-server";
 
 new RpcCodeGenerator({
     baseDirectory: 'test-project/src',
