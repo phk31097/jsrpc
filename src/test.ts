@@ -2,7 +2,7 @@ import {RpcCodeGenerator} from "./code-generator";
 import {RpcServer} from "./rpc-server";
 
 new RpcCodeGenerator({
-    baseDirectory: 'test-project',
+    baseDirectory: 'test-project/src',
     sharedDirectory: 'shared',
     clientDirectory: 'client',
     serverDirectory: 'server',
