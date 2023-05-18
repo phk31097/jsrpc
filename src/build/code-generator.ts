@@ -48,8 +48,7 @@ export class RpcCodeGenerator {
                 console.log(sourceFile.fileName);
                 ts.forEachChild(sourceFile, node => {
                     if (ts.isInterfaceDeclaration(node)) {
-                        const interfaceType = this.program.getTypeChecker().getTypeAtLocation(node);
-                        if (!interfaceType.getBaseTypes()?.map(type => type.getSymbol()?.name).includes(rpcServiceInterfaceName)) {
+                        if (!node.heritageClauses!.find(clause => clause.token === ts.SyntaxKind.ExtendsKeyword && this.program.getTypeChecker().getFullyQualifiedName(this.program.getTypeChecker().getSymbolAtLocation(clause.types[0].expression)!) === rpcServiceInterfaceName)) {
                             return;
                         }
                         const clientFileName = sourceFile.fileName.replace(this.options.sharedDirectory, this.options.clientDirectory);
