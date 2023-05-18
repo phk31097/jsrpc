@@ -20,9 +20,8 @@
     "jsrpc": "./command-line.js"
   },
   "files": [
-    "dist/*",
-    "src/export/*"
+    "dist/*"
   ],
-  "exports": "./dist/export/index.ts",
+  "exports": "./dist/export/index.js",
   "type": "commonjs"
 }
