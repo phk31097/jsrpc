@@ -9,11 +9,12 @@ interface RpcServerOptions {
 
 export class RpcServer {
     private server: Server;
+    public static services: RpcService[] = [];
 
-    constructor(private options: RpcServerOptions, private services: RpcService[]) {
+    constructor(private options: RpcServerOptions) {
         this.server = http.createServer((req: IncomingMessage, res: ServerResponse) => {
             try {
-                const match = new RpcRequestMatcher(services).match(req.url!);
+                const match = new RpcRequestMatcher(RpcServer.services).match(req.url!);
 
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.write(JSON.stringify({response: (match.service[match.method] as Function)(...match.args)}));
