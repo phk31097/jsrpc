@@ -2,11 +2,10 @@
   "name": "@philippkoch/jsrpc",
   "version": "1.0.17",
   "description": "",
-  "main": "index.js",
+  "main": "dist/export/index.js",
   "scripts": {
     "build": "tsc",
-    "prepack": "rm -f *.tgz && npm run build",
-    "postpack": "node pack.js",
+    "prepack": "npm run build",
     "run": "npm run build && node dist/test.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
