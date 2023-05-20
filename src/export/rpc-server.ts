@@ -1,7 +1,6 @@
 import * as http from "http";
 import {IncomingMessage, Server, ServerResponse} from "http";
 import {RpcService} from "./rpc-service";
-import {rpc} from "./rpc-decorator";
 import {RpcRequestMatcher} from "./rpc-request-matcher";
 
 interface RpcServerOptions {
@@ -40,12 +39,5 @@ export class RpcServer {
 
     close(): void {
         this.server.close();
-    }
-}
-
-@rpc
-class RandomServiceClass {
-    myMethod(param1: string) {
-        return 'Hello ' + param1;
     }
 }
