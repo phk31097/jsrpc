@@ -11,7 +11,10 @@ export const rpcServerClassName = 'RpcServer';
 export const rpcServiceInterfaceName = 'RpcService';
 export const rpcClientInterfaceName = 'RpcClient';
 export const rpcDecoratorName = 'rpc';
+
 const PACKAGE_NAME = '@philippkoch/jsrpc';
+const SERVER_CLASS_FILE_NAME = 'server.jsrpc.ts';
+const CLIENT_CLASS_FILE_SUFFIX = '.jsrpc.ts';
 
 interface RpcCodeGeneratorOptions {
     baseDirectory: string;
@@ -66,7 +69,9 @@ export class RpcCodeGenerator {
                         if (!node.heritageClauses?.find || !node.heritageClauses.find(clause => clause.token === ts.SyntaxKind.ExtendsKeyword && this.program.getTypeChecker().getFullyQualifiedName(this.program.getTypeChecker().getSymbolAtLocation(clause.types[0].expression)!) === rpcServiceInterfaceName)) {
                             return;
                         }
-                        const clientFileName = sourceFile.fileName.replace(this.options.sharedDirectory, this.options.clientDirectory);
+                        const clientFileName = sourceFile.fileName
+                            .replace(this.options.sharedDirectory, this.options.clientDirectory)
+                            .replace('\.ts', CLIENT_CLASS_FILE_SUFFIX);
                         let file = ts.createSourceFile("generatedSource.ts", "", ts.ScriptTarget.ES2015);
 
                         const output = [
@@ -82,7 +87,7 @@ export class RpcCodeGenerator {
                     }
                 })
             })
-        let file = ts.createSourceFile("server.ts", "", ts.ScriptTarget.ES2015);
+        let file = ts.createSourceFile(SERVER_CLASS_FILE_NAME, "", ts.ScriptTarget.ES2015);
 
         const output = [
             generateImport(rpcServerClassName, PACKAGE_NAME),
@@ -92,7 +97,7 @@ export class RpcCodeGenerator {
         this.writeFile([
             this.options.baseDirectory,
             this.options.serverDirectory,
-            'server.ts'
+            SERVER_CLASS_FILE_NAME
         ].join('/'), output.join('\n'));
     }
 
