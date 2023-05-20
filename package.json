@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "prepack": "npm run build && cp src/export/* dist/export",
+    "prepack": "rm -f *.tgz && npm run build",
+    "postpack": "node pack.js",
     "run": "npm run build && node dist/test.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -14,6 +15,7 @@
   "license": "ISC",
   "dependencies": {
     "@types/node": "^18.16.3",
+    "tar": "^6.1.15",
     "typescript": "^5.0.4"
   },
   "bin": {
@@ -21,12 +23,5 @@
   },
   "files": [
     "dist/*"
-  ],
-  "exports": {
-    ".": {
-      "import": "./dist/export/index.ts",
-      "require": "./dist/export/index.js"
-    }
-  },
-  "type": "commonjs"
+  ]
 }
