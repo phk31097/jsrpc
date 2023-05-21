@@ -17,7 +17,7 @@ export class RpcClientFactory {
                     console.log(`Parameters: ${args}`);
                     fetch(`http://localhost:3000/${serviceName}%${key}?${args.map((value, index) => `p${index}=${value}`).join('&')}`)
                         .then(response => response.json())
-                        .then(data => resolve(data))
+                        .then(data => resolve(data['response']))
                         .catch(e => reject(e));
                 });
             }
