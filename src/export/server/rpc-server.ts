@@ -1,7 +1,7 @@
 import * as http from "http";
 import {IncomingMessage, Server, ServerResponse} from "http";
-import {RpcRequestMatcher} from "./rpc-request-matcher";
-import {RpcServiceConfiguration} from "./rpc-service-configuration";
+import {RpcRequestMatcher} from "../rpc-request-matcher";
+import {RpcServiceConfiguration} from "../rpc-service-configuration";
 
 interface RpcServerOptions {
     port: number;
