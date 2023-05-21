@@ -20,8 +20,9 @@ switch(method) {
         generator.generate();
         break;
     case START_SERVER:
-        console.log('Starting server');
-        new RpcServer({port: 3000}).listen();
+        console.log('Starting server, trying the following file: ' + process.argv[3]);
+        const http = require('http');
+        require(process.argv[3]);
         break;
     default:
         throw new Error('Command not supported: ' + method);
