@@ -2,6 +2,7 @@ import {RpcServiceMapping} from "./rpc-service-mapping";
 
 export class RpcClientFactory {
     public getClient<T extends RpcServiceMapping>(): T {
+        const factory = this;
         return new Proxy({}, {
             get(_1, serviceName){
                 return new Proxy({}, {
@@ -10,6 +11,7 @@ export class RpcClientFactory {
                             console.log(serviceName)
                             console.log(methodName);
                             console.log(args);
+                            factory.performRequest(String(serviceName), String(methodName), args);
                         }
                     }
                 })
