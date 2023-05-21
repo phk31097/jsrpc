@@ -53,7 +53,7 @@ export function generateClientClass(itf: InterfaceDeclaration, program: Program)
 
     return ts.factory.createClassDeclaration(
         [ts.factory.createModifier(SyntaxKind.ExportKeyword)],
-        ts.factory.createIdentifier(itf.name.text + 'Client'),
+        ts.factory.createIdentifier(itf.name.text),
         undefined,
         [
             ts.factory.createHeritageClause(ts.SyntaxKind.ImplementsKeyword,

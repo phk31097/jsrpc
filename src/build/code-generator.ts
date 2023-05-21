@@ -91,7 +91,7 @@ export class RpcCodeGenerator {
                             },
                             client: {
                                 location: clientFileName,
-                                name: node.name.text + 'Client',
+                                name: node.name.text,
                                 code: clientClass
                             }
                         })
