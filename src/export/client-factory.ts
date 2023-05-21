@@ -1,27 +1,30 @@
-import {RpcClient, RpcService} from "./rpc-service";
-
-interface RpcServiceClass<T extends RpcService> {
-    new (): T;
-}
+export interface RpcServiceMapping {}
 
 export class RpcClientFactory {
-    getClient<T extends RpcService>(service: RpcServiceClass<T>): RpcClient<T> {
-        const instance = new service();
-        const prototype = Object.getPrototypeOf(instance);
-        for (const key of Object.getOwnPropertyNames(prototype).filter((key) => typeof prototype[key] === 'function')) {
-            (instance as any)[key] = (...args: any[]) => {
-                return new Promise((resolve, reject) => {
-                    const serviceName = service.name.replace('Client', ''); // FIXME
-                    alert(`Call to ${serviceName}#${key}`);
-                    console.log(`Call to ${serviceName}#${key}`);
-                    console.log(`Parameters: ${args}`);
-                    fetch(`http://localhost:3000/${serviceName}%${key}?${args.map((value, index) => `p${index}=${value}`).join('&')}`)
-                        .then(response => response.json())
-                        .then(data => resolve(data['response']))
-                        .catch(e => reject(e));
-                });
+    public getClient<T extends RpcServiceMapping>(): T {
+        return new Proxy({}, {
+            get(_1, serviceName){
+                return new Proxy({}, {
+                    get(_2, methodName) {
+                        return (...args: any[]) => {
+                            console.log(serviceName)
+                            console.log(methodName);
+                            console.log(args);
+                        }
+                    }
+                })
             }
-        }
-        return instance as RpcClient<T>;
+        }) as T;
+    }
+
+    protected performRequest(serviceName: string, methodName: string, ...args: any[]): Promise<any> {
+        return new Promise((resolve, reject) => {
+            console.log(`Call to ${serviceName}#${methodName}`);
+            console.log(`Parameters: ${args}`);
+            fetch(`http://localhost:3000/${serviceName}%${methodName}?${args.map((value, index) => `p${index}=${value}`).join('&')}`)
+                .then(response => response.json())
+                .then(data => resolve(data['response']))
+                .catch(e => reject(e));
+        });
     }
 }

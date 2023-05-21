@@ -1,6 +1,6 @@
 import * as ts from "typescript";
 import {ClassDeclaration, DeclarationStatement, EmitHint, InterfaceDeclaration, Program} from "typescript";
-import {generateClientClass} from "./generate-client-class.fn";
+import {generateClientMapping} from "./generate-client-mapping.fn";
 import {generateImport} from "./generate-import.fn";
 import {hasRpcDecorator} from "./has-rpc-decorator.fn";
 import {generateServerClass} from "./generate-server-class.fn";
@@ -10,11 +10,12 @@ const fs = require('fs');
 export const rpcServerClassName = 'RpcServer';
 export const rpcServiceInterfaceName = 'RpcService';
 export const rpcClientInterfaceName = 'RpcClient';
+export const rpcServiceMappingInterfaceName = 'RpcServiceMapping';
 export const rpcDecoratorName = 'rpc';
 
 const PACKAGE_NAME = '@philippkoch/jsrpc';
 const SERVER_CLASS_FILE_NAME = 'server.jsrpc.ts';
-const CLIENT_CLASS_FILE_SUFFIX = '.jsrpc.ts';
+const CLIENT_CLASS_FILE_NAME = 'client.jsrpc.ts';
 
 interface RpcCodeGeneratorOptions {
     baseDirectory: string;
@@ -68,31 +69,11 @@ export class RpcCodeGenerator {
                         if (!node.heritageClauses?.find || !node.heritageClauses.find(clause => clause.token === ts.SyntaxKind.ExtendsKeyword && this.program.getTypeChecker().getFullyQualifiedName(this.program.getTypeChecker().getSymbolAtLocation(clause.types[0].expression)!) === rpcServiceInterfaceName)) {
                             return;
                         }
-                        const clientFileName = sourceFile.fileName
-                            .replace(this.options.sharedDirectory, this.options.clientDirectory)
-                            .replace('\.ts', CLIENT_CLASS_FILE_SUFFIX);
-                        let file = ts.createSourceFile("generatedSource.ts", "", ts.ScriptTarget.ES2015);
-
-                        const clientClass = generateClientClass(node, this.program);
-
-                        const output = [
-                            generateImport(rpcClientInterfaceName, PACKAGE_NAME),
-                            generateImport(node.name.text, sourceFile.fileName.replace(this.options.baseDirectory, '..')),
-                            clientClass
-                        ].map(n => printer.printNode(EmitHint.Unspecified, n, file));
-
-                        this.writeFile(clientFileName, output.join('\n'));
-
                         serviceCode.push({
                             shared: {
                                 location: sourceFile.fileName,
                                 name: node.name.text,
                                 code: node
-                            },
-                            client: {
-                                location: clientFileName,
-                                name: node.name.text + 'Client',
-                                code: clientClass
                             }
                         })
                     } else if (ts.isClassDeclaration(node) && hasRpcDecorator(node)) {
@@ -136,7 +117,7 @@ export class RpcCodeGenerator {
             }
         }
 
-        const output = [
+        const serverOutput = [
             generateImport(rpcServerClassName, PACKAGE_NAME),
             ...uniqueServerClasses.map(declaration => generateImport(declaration.code.name, this.getNameOfClassFile(declaration.code))),
             generateServerClass(uniqueServerClasses)
@@ -145,14 +126,25 @@ export class RpcCodeGenerator {
             this.options.baseDirectory,
             this.options.serverDirectory,
             SERVER_CLASS_FILE_NAME
-        ].join('/'), output.join('\n'));
+        ].join('/'), serverOutput.join('\n'));
+
+        const clientOutput = [
+            generateImport(rpcServiceMappingInterfaceName, PACKAGE_NAME),
+            generateImport(rpcClientInterfaceName, PACKAGE_NAME),
+            ...serviceCode.map(code => generateImport(code.shared.name, code.shared.location.replace(this.options.baseDirectory, '..'))),
+            generateClientMapping(serviceCode)
+        ].map(n => printer.printNode(EmitHint.Unspecified, n, file));
+        this.writeFile([
+            this.options.baseDirectory,
+            this.options.clientDirectory,
+            CLIENT_CLASS_FILE_NAME
+        ].join('/'), clientOutput.join('\n'));
 
         console.log('#########################################');
         console.log('The following services will be available:');
         console.log('#########################################');
         serviceCode.forEach(code => {
             console.log(code.shared.name);
-            console.log(` ↳ ${code.client?.name}`)
             console.log(` ↳ ${code.server?.name}`)
         });
     }
@@ -170,7 +162,6 @@ export class RpcCodeGenerator {
 export interface RpcServiceCode {
     shared: RpcServiceCodeLocation<InterfaceDeclaration>;
     server?: RpcServiceCodeLocation<ClassDeclaration>;
-    client?: RpcServiceCodeLocation<ClassDeclaration>;
 }
 
 interface RpcServiceCodeLocation<T extends DeclarationStatement> {
