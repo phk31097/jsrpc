@@ -7,7 +7,7 @@ export class RpcClientFactory {
             get(_1, serviceName){
                 return new Proxy({}, {
                     get(_2, methodName) {
-                        return (args: any[]) => {
+                        return (...args: any[]) => {
                             console.log(serviceName)
                             console.log(methodName);
                             console.log(args);
