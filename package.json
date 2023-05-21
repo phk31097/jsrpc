@@ -25,6 +25,6 @@
   ],
   "exports": {
     ".": "./dist/export/index.js",
-    "./server": "./dist/export/server/nodejs"
+    "./server": "./dist/export/server/index.js"
   }
 }
