@@ -1,4 +1,5 @@
 import {RpcService} from "./rpc-service";
+import {RpcServiceConfiguration} from "./rpc-server";
 
 export class RpcRequestMatcher {
 
@@ -7,7 +8,7 @@ export class RpcRequestMatcher {
     protected readonly PARAM_SEPARATOR = '&';
     protected readonly PARAM_VALUE_SEPARATOR = '=';
 
-    constructor(protected services: RpcService[]) {}
+    constructor(protected services: RpcServiceConfiguration<any>[]) {}
 
     public match<T extends RpcService>(url: string): {service: T, method: keyof T, args: any[]} {
         const [serviceString, methodAndParams] = url.substring(1).split(this.METHOD_SEPARATOR);
@@ -20,18 +21,18 @@ export class RpcRequestMatcher {
         const args = paramString ? paramString.split(this.PARAM_SEPARATOR)
             .map(split => split.split(this.PARAM_VALUE_SEPARATOR)[1]) : [];
 
-        const service = this.services.find(service => service.constructor.name === serviceString) as T | undefined;
+        const serviceConfiguration = this.services.find(service => service.listensTo.includes(serviceString)) as RpcServiceConfiguration<T> | undefined;
 
-        if (!service) {
+        if (!serviceConfiguration) {
             throw new Error(`No service '${serviceString}' found`);
         }
 
-        if (!(methodString in service)) {
-            throw new Error(`No method '${methodString}' found in '${service}'`)
+        if (!(methodString in serviceConfiguration)) {
+            throw new Error(`No method '${methodString}' found in '${serviceConfiguration}'`)
         }
 
         const method: keyof T = methodString as keyof T;
 
-        return {service, method, args};
+        return {service: serviceConfiguration.service, method, args};
     }
 }

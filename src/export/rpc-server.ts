@@ -10,7 +10,7 @@ interface RpcServerOptions {
 export class RpcServer {
     private server: Server;
 
-    constructor(private options: RpcServerOptions, private services: RpcService[]) {
+    constructor(private options: RpcServerOptions, private services: RpcServiceConfiguration<any>[]) {
         this.server = http.createServer((req: IncomingMessage, res: ServerResponse) => {
             try {
                 const match = new RpcRequestMatcher(this.services).match(req.url!);
@@ -39,4 +39,9 @@ export class RpcServer {
     close(): void {
         this.server.close();
     }
+}
+
+export interface RpcServiceConfiguration<T extends RpcService> {
+    listensTo: string[];
+    service: T;
 }

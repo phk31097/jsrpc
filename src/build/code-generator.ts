@@ -1,5 +1,5 @@
 import * as ts from "typescript";
-import {ClassDeclaration, DeclarationStatement, EmitHint, InterfaceDeclaration, Program, SourceFile} from "typescript";
+import {ClassDeclaration, DeclarationStatement, EmitHint, InterfaceDeclaration, Program} from "typescript";
 import {generateClientClass} from "./generate-client-class.fn";
 import {generateImport} from "./generate-import.fn";
 import {hasRpcDecorator} from "./has-rpc-decorator.fn";
@@ -126,19 +126,20 @@ export class RpcCodeGenerator {
 
         let file = ts.createSourceFile(SERVER_CLASS_FILE_NAME, "", ts.ScriptTarget.ES2015);
 
-        const uniqueServerClasses: RpcServiceCodeLocation<ClassDeclaration>[] = [];
+        const uniqueServerClasses: RpcServerClassMapping[] = [];
         for (const declaration of serviceCode.map(code => code.server)) {
-            if (!uniqueServerClasses.find(code => declaration!.name === code.name)) {
-                uniqueServerClasses.push(declaration!);
+            if (!uniqueServerClasses.find(mapping => declaration!.name === mapping.code.name)) {
+                uniqueServerClasses.push({
+                    code: declaration!,
+                    listensTo: serviceCode.filter(code => code.server?.name === declaration?.name).map(code => code.shared.name)
+                });
             }
         }
 
         const output = [
             generateImport(rpcServerClassName, PACKAGE_NAME),
-            ...uniqueServerClasses.map(declaration => generateImport(declaration.name, this.getNameOfClassFile(declaration))),
-            generateServerClass(uniqueServerClasses
-                .filter(code => code.code)
-                .map(d => d.code))
+            ...uniqueServerClasses.map(declaration => generateImport(declaration.code.name, this.getNameOfClassFile(declaration.code))),
+            generateServerClass(uniqueServerClasses)
         ].map(n => printer.printNode(EmitHint.Unspecified, n, file));
         this.writeFile([
             this.options.baseDirectory,
@@ -166,7 +167,7 @@ export class RpcCodeGenerator {
     }
 }
 
-interface RpcServiceCode {
+export interface RpcServiceCode {
     shared: RpcServiceCodeLocation<InterfaceDeclaration>;
     server?: RpcServiceCodeLocation<ClassDeclaration>;
     client?: RpcServiceCodeLocation<ClassDeclaration>;
@@ -176,4 +177,9 @@ interface RpcServiceCodeLocation<T extends DeclarationStatement> {
     name: string;
     location: string;
     code: T;
+}
+
+export interface RpcServerClassMapping {
+    code: RpcServiceCodeLocation<ClassDeclaration>;
+    listensTo: string[];
 }
