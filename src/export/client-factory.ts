@@ -14,7 +14,7 @@ export class RpcClientFactory {
                     alert(`Call to ${service.name}#${key}`);
                     console.log(`Call to ${service.name}#${key}`);
                     console.log(`Parameters: ${args}`);
-                    fetch(`https://localhost:3000/${service.name}%${key}?${args.map((value, index) => `p${index}=${value}`).join('&')}`)
+                    fetch(`http://localhost:3000/${service.name}%${key}?${args.map((value, index) => `p${index}=${value}`).join('&')}`)
                         .catch(e => reject(e))
                         .then(response => resolve(response));
                 });
