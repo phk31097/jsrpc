@@ -11,10 +11,11 @@ export class RpcClientFactory {
         for (const key of Object.getOwnPropertyNames(prototype).filter((key) => typeof prototype[key] === 'function')) {
             (instance as any)[key] = (...args: any[]) => {
                 return new Promise((resolve, reject) => {
-                    alert(`Call to ${service.name}#${key}`);
-                    console.log(`Call to ${service.name}#${key}`);
+                    const serviceName = service.name.replace('Client', ''); // FIXME
+                    alert(`Call to ${serviceName}#${key}`);
+                    console.log(`Call to ${serviceName}#${key}`);
                     console.log(`Parameters: ${args}`);
-                    fetch(`http://localhost:3000/${service.name}%${key}?${args.map((value, index) => `p${index}=${value}`).join('&')}`)
+                    fetch(`http://localhost:3000/${serviceName}%${key}?${args.map((value, index) => `p${index}=${value}`).join('&')}`)
                         .catch(e => reject(e))
                         .then(response => resolve(response));
                 });
