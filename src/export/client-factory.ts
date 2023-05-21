@@ -1,4 +1,4 @@
-export interface RpcServiceMapping {}
+import {RpcServiceMapping} from "./rpc-service-mapping";
 
 export class RpcClientFactory {
     public getClient<T extends RpcServiceMapping>(): T {
