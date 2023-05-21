@@ -27,7 +27,7 @@ export class RpcRequestMatcher {
             throw new Error(`No service '${serviceString}' found`);
         }
 
-        if (!(methodString in serviceConfiguration)) {
+        if (!(methodString in serviceConfiguration.service)) {
             throw new Error(`No method '${methodString}' found in '${serviceConfiguration}'`)
         }
 
