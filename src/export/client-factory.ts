@@ -11,6 +11,7 @@ export class RpcClientFactory {
         for (const key of Object.getOwnPropertyNames(prototype).filter((key) => typeof prototype[key] === 'function')) {
             (instance as any)[key] = (...args: any[]) => {
                 return new Promise((resolve, reject) => {
+                    alert(`Call to ${service.name}#${key}`);
                     console.log(`Call to ${service.name}#${key}`);
                     console.log(`Parameters: ${args}`);
                 });

@@ -1,5 +1,5 @@
 import * as ts from "typescript";
-import {ClassDeclaration, EmitHint, Program, SourceFile} from "typescript";
+import {ClassDeclaration, DeclarationStatement, EmitHint, InterfaceDeclaration, Program, SourceFile} from "typescript";
 import {generateClientClass} from "./generate-client-class.fn";
 import {generateImport} from "./generate-import.fn";
 import {hasRpcDecorator} from "./has-rpc-decorator.fn";
@@ -59,11 +59,10 @@ export class RpcCodeGenerator {
     public generate(): void {
         const printer = ts.createPrinter({ newLine: ts.NewLineKind.CarriageReturnLineFeed });
 
-        const classDeclarations: ClassDeclarationInFile[] = [];
+        const serviceCode: RpcServiceCode[] = [];
         this.program.getSourceFiles()
             .filter(sourceFile => !sourceFile.isDeclarationFile)
             .forEach(sourceFile => {
-                console.log(sourceFile.fileName);
                 ts.forEachChild(sourceFile, node => {
                     if (ts.isInterfaceDeclaration(node)) {
                         if (!node.heritageClauses?.find || !node.heritageClauses.find(clause => clause.token === ts.SyntaxKind.ExtendsKeyword && this.program.getTypeChecker().getFullyQualifiedName(this.program.getTypeChecker().getSymbolAtLocation(clause.types[0].expression)!) === rpcServiceInterfaceName)) {
@@ -74,35 +73,84 @@ export class RpcCodeGenerator {
                             .replace('\.ts', CLIENT_CLASS_FILE_SUFFIX);
                         let file = ts.createSourceFile("generatedSource.ts", "", ts.ScriptTarget.ES2015);
 
+                        const clientClass = generateClientClass(node, this.program);
+
                         const output = [
                             generateImport(rpcClientInterfaceName, PACKAGE_NAME),
                             generateImport(node.name.text, sourceFile.fileName.replace(this.options.baseDirectory, '..')),
-                            generateClientClass(node, this.program)
+                            clientClass
                         ].map(n => printer.printNode(EmitHint.Unspecified, n, file));
 
                         this.writeFile(clientFileName, output.join('\n'));
+
+                        serviceCode.push({
+                            shared: {
+                                location: sourceFile.fileName,
+                                name: node.name.text,
+                                code: node
+                            },
+                            client: {
+                                location: clientFileName,
+                                name: node.name.text + 'Client',
+                                code: clientClass
+                            }
+                        })
                     } else if (ts.isClassDeclaration(node) && hasRpcDecorator(node)) {
-                        console.log(node.name?.text);
-                        classDeclarations.push([node, sourceFile]);
+                        if (node.heritageClauses?.find) {
+                            const implementedInterfaces = node.heritageClauses
+                                .filter(clause => clause.token === ts.SyntaxKind.ImplementsKeyword)
+                                .flatMap(clause => clause.types.map(type => this.program.getTypeChecker().getFullyQualifiedName(this.program.getTypeChecker().getSymbolAtLocation(type.expression)!)));
+                            serviceCode.forEach(code => {
+                                if (implementedInterfaces.includes(code.shared.name)) {
+                                    if (code.server) {
+                                        throw new Error(`Multiple implementations found for ${code.shared.name}`);
+                                    }
+                                    code.server = {
+                                        name: node.name!.text,
+                                        location: sourceFile.fileName,
+                                        code: node
+                                    };
+                                }
+                            })
+                            return;
+                        }
                     }
                 })
             })
+
+        serviceCode.forEach(code => {
+            if (!code.server) {
+                throw new Error(`No implementation found for ${code.shared.name}`);
+            }
+        })
+
         let file = ts.createSourceFile(SERVER_CLASS_FILE_NAME, "", ts.ScriptTarget.ES2015);
 
         const output = [
             generateImport(rpcServerClassName, PACKAGE_NAME),
-            ...classDeclarations.map(classDeclaration => generateImport(classDeclaration[0].name!.text, this.getNameOfClassFile(classDeclaration))),
-            generateServerClass(classDeclarations.map(d => d[0]))
+            ...serviceCode.map(classDeclaration => generateImport(classDeclaration.server!.name, this.getNameOfClassFile(classDeclaration.server!))),
+            generateServerClass(serviceCode
+                .filter(code => code.server && code.server.code)
+                .map(d => d.server!.code))
         ].map(n => printer.printNode(EmitHint.Unspecified, n, file));
         this.writeFile([
             this.options.baseDirectory,
             this.options.serverDirectory,
             SERVER_CLASS_FILE_NAME
         ].join('/'), output.join('\n'));
+
+        console.log('#########################################');
+        console.log('The following services will be available:');
+        console.log('#########################################');
+        serviceCode.forEach(code => {
+            console.log(code.shared.name);
+            console.log(` ↳ ${code.client?.name}`)
+            console.log(` ↳ ${code.server?.name}`)
+        });
     }
 
-    protected getNameOfClassFile(declaration: ClassDeclarationInFile): string {
-        return './' + declaration[1].fileName.split([
+    protected getNameOfClassFile(declaration: RpcServiceCodeLocation<ClassDeclaration>): string {
+        return './' + declaration.location.split([
             this.options.baseDirectory,
             '/',
             this.options.serverDirectory,
@@ -111,4 +159,14 @@ export class RpcCodeGenerator {
     }
 }
 
-type ClassDeclarationInFile = [declaration: ClassDeclaration, file: SourceFile];
+interface RpcServiceCode {
+    shared: RpcServiceCodeLocation<InterfaceDeclaration>;
+    server?: RpcServiceCodeLocation<ClassDeclaration>;
+    client?: RpcServiceCodeLocation<ClassDeclaration>;
+}
+
+interface RpcServiceCodeLocation<T extends DeclarationStatement> {
+    name: string;
+    location: string;
+    code: T;
+}

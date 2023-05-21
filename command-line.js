@@ -12,7 +12,7 @@ switch(method) {
     case GENERATE_CLASSES:
         console.log('Generating classes');
         const generator = new RpcCodeGenerator({
-            baseDirectory: 'src',
+            baseDirectory: 'test-project/src',
             sharedDirectory: 'shared',
             clientDirectory: 'client',
             serverDirectory: 'server',
