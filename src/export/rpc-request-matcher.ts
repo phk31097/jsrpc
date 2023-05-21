@@ -1,5 +1,5 @@
 import {RpcService} from "./rpc-service";
-import {RpcServiceConfiguration} from "./rpc-server";
+import {RpcServiceConfiguration} from "./rpc-service-configuration";
 
 export class RpcRequestMatcher {
 

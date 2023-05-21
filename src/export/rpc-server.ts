@@ -1,7 +1,7 @@
 import * as http from "http";
 import {IncomingMessage, Server, ServerResponse} from "http";
-import {RpcService} from "./rpc-service";
 import {RpcRequestMatcher} from "./rpc-request-matcher";
+import {RpcServiceConfiguration} from "./rpc-service-configuration";
 
 interface RpcServerOptions {
     port: number;
@@ -39,9 +39,4 @@ export class RpcServer {
     close(): void {
         this.server.close();
     }
-}
-
-export interface RpcServiceConfiguration<T extends RpcService> {
-    listensTo: string[];
-    service: T;
 }
