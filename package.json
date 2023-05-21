@@ -1,6 +1,6 @@
 {
   "name": "@philippkoch/jsrpc",
-  "version": "1.0.24",
+  "version": "1.0.25",
   "description": "",
   "main": "dist/export/index.js",
   "scripts": {
