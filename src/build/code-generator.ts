@@ -126,12 +126,19 @@ export class RpcCodeGenerator {
 
         let file = ts.createSourceFile(SERVER_CLASS_FILE_NAME, "", ts.ScriptTarget.ES2015);
 
+        const uniqueServerClasses: RpcServiceCodeLocation<ClassDeclaration>[] = [];
+        for (const declaration of serviceCode.map(code => code.server)) {
+            if (!uniqueServerClasses.find(code => declaration!.name === code.name)) {
+                uniqueServerClasses.push(declaration!);
+            }
+        }
+
         const output = [
             generateImport(rpcServerClassName, PACKAGE_NAME),
-            ...serviceCode.map(classDeclaration => generateImport(classDeclaration.server!.name, this.getNameOfClassFile(classDeclaration.server!))),
-            generateServerClass(serviceCode
-                .filter(code => code.server && code.server.code)
-                .map(d => d.server!.code))
+            ...uniqueServerClasses.map(declaration => generateImport(declaration.name, this.getNameOfClassFile(declaration))),
+            generateServerClass(uniqueServerClasses
+                .filter(code => code.code)
+                .map(d => d.code))
         ].map(n => printer.printNode(EmitHint.Unspecified, n, file));
         this.writeFile([
             this.options.baseDirectory,
