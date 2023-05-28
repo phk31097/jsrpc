@@ -7,15 +7,34 @@ const path = require('path');
 
 export class JsrpcProject {
     public static PROJECT_FILE_NAME = 'jsrpc.json';
-    public configuration: JsrpcConfig
+    public configuration: JsrpcConfig;
 
     protected constructor(public dir: string) {
-        console.log(`Project initialized in directory '${dir}'`)
+        console.log(`Project found in directory '${dir}'`)
         this.configuration = JsrpcConfigValidator.getConfig(JSON.parse(fs.readFileSync(path.resolve(this.dir, JsrpcProject.PROJECT_FILE_NAME))));
     }
 
     public static init(): JsrpcProject {
-        return new JsrpcProject(JsrpcProject.findProjectFile(process.cwd()));
+        const project = new JsrpcProject(JsrpcProject.findProjectFile(process.cwd()));
+
+        JsrpcProject.validate(project);
+
+        return project;
+    }
+
+    protected static validate(project: JsrpcProject): void {
+        if (!fs.existsSync(project.pathInBasePath())) {
+            throw new Error(`Base path not found: ${project.pathInBasePath()}`);
+        }
+        if (!fs.existsSync(project.pathInBasePath(project.configuration.code.clientDirectory))) {
+            throw new Error(`Client path not found: ${project.pathInBasePath(project.configuration.code.clientDirectory)}`);
+        }
+        if (!fs.existsSync(project.pathInBasePath(project.configuration.code.serverDirectory))) {
+            throw new Error(`Server path not found: ${project.pathInBasePath(project.configuration.code.serverDirectory)}`);
+        }
+        if (!fs.existsSync(project.pathInBasePath(project.configuration.code.sharedDirectory))) {
+            throw new Error(`Shared path not found: ${project.pathInBasePath(project.configuration.code.sharedDirectory)}`);
+        }
     }
 
     protected static findProjectFile(dir: string): string {
