@@ -29,7 +29,7 @@ export class JsrpcProject {
     }
 
     public generateCode(): void {
-        new RpcCodeGenerator(this.configuration).generate();
+        new RpcCodeGenerator(this).generate();
     }
 
     public startServer(): void {
