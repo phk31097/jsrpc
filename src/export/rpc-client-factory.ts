@@ -32,6 +32,7 @@ export class RpcClientFactory {
                 .then(response => response.json())
                 .then(data => {
                     console.log(data);
+                    console.log(RpcDeserializer.getObject(data));
                     return RpcDeserializer.getObject(data)
                 })
                 .catch(e => reject(e));
