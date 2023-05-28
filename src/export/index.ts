@@ -5,3 +5,5 @@ export * from './rpc-client';
 export * from './rpc-client-factory';
 export * from './rpc-service-mapping';
 export * from './rpc-service-configuration';
+export * from './rpc-serializer';
+export * from './rpc-deserializer';

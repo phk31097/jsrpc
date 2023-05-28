@@ -3,6 +3,7 @@ import {IncomingMessage, Server, ServerResponse} from "http";
 import {RpcRequestMatcher} from "../rpc-request-matcher";
 import {RpcServiceConfiguration} from "../rpc-service-configuration";
 import {RpcServerConfiguration} from "../rpc-server-configuration";
+import {RpcSerializer} from "../rpc-serializer";
 
 export class RpcServer {
     private server: Server;
@@ -13,7 +14,8 @@ export class RpcServer {
                 const match = new RpcRequestMatcher(this.services).match(req.url!);
 
                 res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.write(JSON.stringify({response: (match.service[match.method] as Function)(...match.args)}));
+                const response = RpcSerializer.getResponse((match.service[match.method] as Function)(...match.args));
+                res.write(JSON.stringify(response));
             } catch (e: any) {
                 res.writeHead(400, { 'Content-Type': 'application/json' });
                 if ('message' in e) {

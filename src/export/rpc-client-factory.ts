@@ -1,5 +1,6 @@
 import {RpcServiceMapping} from "./rpc-service-mapping";
 import {RpcServerConfiguration} from "./rpc-server-configuration";
+import {RpcDeserializer} from "./rpc-deserializer";
 
 export class RpcClientFactory {
 
@@ -29,7 +30,7 @@ export class RpcClientFactory {
             console.log(`Parameters: ${args}`);
             fetch(`${this.config.host}:${this.config.port}/${serviceName}%${methodName}?${args.map((value, index) => `p${index}=${value}`).join('&')}`)
                 .then(response => response.json())
-                .then(data => resolve(data['response']))
+                .then(data => RpcDeserializer.getObject(data))
                 .catch(e => reject(e));
         });
     }
