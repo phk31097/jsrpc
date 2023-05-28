@@ -23,7 +23,7 @@ export class RpcSerializer {
             objects: [],
         };
 
-        responseObject.response = RpcSerializer.serialize(obj, responseObject, 0);
+        responseObject.response = RpcSerializer.serialize(obj, responseObject);
         responseObject.objects.forEach(o => {delete o.value.$key});
 
         return responseObject;
