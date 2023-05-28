@@ -30,7 +30,10 @@ export class RpcClientFactory {
             console.log(`Parameters: ${args}`);
             fetch(`${this.config.host}:${this.config.port}/${serviceName}%${methodName}?${args.map((value, index) => `p${index}=${value}`).join('&')}`)
                 .then(response => response.json())
-                .then(data => RpcDeserializer.getObject(data))
+                .then(data => {
+                    console.log(data);
+                    return RpcDeserializer.getObject(data)
+                })
                 .catch(e => reject(e));
         });
     }

@@ -99,7 +99,7 @@ export class RpcCodeGenerator {
 
         const serverOutput = [
             generateImport(rpcServerClassName, SERVER_PACKAGE_NAME),
-            ...uniqueServerClasses.map(declaration => generateImport(declaration.code.name, this.getNameOfClassFile(declaration.code))),
+            ...uniqueServerClasses.map(declaration => generateImport(declaration.code.name, './' + this.getNameOfClassFile(declaration.code))),
             generateServerClass(uniqueServerClasses, this.project)
         ].map(n => printer.printNode(EmitHint.Unspecified, n, file));
         this.writeFile(this.project.getServerFile(), serverOutput.join('\n'));
