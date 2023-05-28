@@ -19,7 +19,6 @@ switch(method) {
         break;
     case START_SERVER:
         console.log('Starting server, trying the following file: ' + process.argv[3]);
-        const http = require('http');
         require(process.argv[3]);
         break;
     default:

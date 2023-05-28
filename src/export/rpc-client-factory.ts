@@ -1,6 +1,10 @@
 import {RpcServiceMapping} from "./rpc-service-mapping";
+import {RpcServerConfiguration} from "./rpc-server-configuration";
 
 export class RpcClientFactory {
+
+    constructor(protected config: RpcServerConfiguration) {}
+
     public getClient<T extends RpcServiceMapping>(): T {
         const factory = this;
         return new Proxy({}, {
@@ -23,7 +27,7 @@ export class RpcClientFactory {
         return new Promise((resolve, reject) => {
             console.log(`Call to ${serviceName}#${methodName}`);
             console.log(`Parameters: ${args}`);
-            fetch(`http://localhost:3000/${serviceName}%${methodName}?${args.map((value, index) => `p${index}=${value}`).join('&')}`)
+            fetch(`${this.config.host}:${this.config.port}/${serviceName}%${methodName}?${args.map((value, index) => `p${index}=${value}`).join('&')}`)
                 .then(response => response.json())
                 .then(data => resolve(data['response']))
                 .catch(e => reject(e));

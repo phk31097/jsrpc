@@ -6,6 +6,7 @@ export function generateServerClass(
 ): ts.ExpressionStatement {
     const portArgument = ts.factory.createObjectLiteralExpression([
         ts.factory.createPropertyAssignment("port", ts.factory.createNumericLiteral("3000")),
+        ts.factory.createPropertyAssignment("host", ts.factory.createStringLiteral("http://localhost")),
     ]);
 
     const serviceInstantiations = classDeclarations.map((classDeclaration) =>
