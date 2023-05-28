@@ -15,6 +15,8 @@ export interface RpcSerializedResponse {
 }
 
 export class RpcSerializer {
+    protected static counter = 0;
+
     public static getResponse(obj: any): RpcSerializedResponse {
         const responseObject: RpcSerializedResponse = {
             response: null,
@@ -27,15 +29,15 @@ export class RpcSerializer {
         return responseObject;
     }
 
-    protected static serialize(obj: any, response: RpcSerializedResponse, counter: number): RpcResponseType | RpcResponseType[] {
+    protected static serialize(obj: any, response: RpcSerializedResponse): RpcResponseType | RpcResponseType[] {
         if (RpcSerializer.isResponseVariable(obj)) {
             return {$key: obj.$key};
         }
         if (RpcSerializer.isObject(obj)) {
-            obj.$key = `key${counter}`;
+            obj.$key = `key${this.counter++}`;
             const serializedObject: {[index: string]: RpcResponseType | RpcResponseType[]} = {};
             for (const key in obj) {
-                serializedObject[key] = RpcSerializer.serialize(obj[key], response, counter + 1);
+                serializedObject[key] = RpcSerializer.serialize(obj[key], response);
             }
             const objectKey = RpcSerializer.findObject(serializedObject, response);
             if (objectKey) {
@@ -44,7 +46,7 @@ export class RpcSerializer {
                 return RpcSerializer.registerObject(serializedObject, response, obj.$key);
             }
         } else if (Array.isArray(obj)) {
-            return obj.map(item => this.serialize(item, response, counter + 1) as RpcResponseType);
+            return obj.map(item => this.serialize(item, response) as RpcResponseType);
         }
         return obj;
     }

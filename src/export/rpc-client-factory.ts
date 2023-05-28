@@ -15,7 +15,6 @@ export class RpcClientFactory {
                         return (...args: any[]) => {
                             console.log(serviceName)
                             console.log(methodName);
-                            console.log(args);
                             return factory.performRequest(String(serviceName), String(methodName), args);
                         }
                     }
