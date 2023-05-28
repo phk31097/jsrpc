@@ -107,7 +107,7 @@ export class RpcCodeGenerator {
         const clientOutput = [
             generateImport(rpcServiceMappingInterfaceName, PACKAGE_NAME),
             generateImport(rpcClientInterfaceName, PACKAGE_NAME),
-            ...serviceCode.map(code => generateImport(code.shared.name, code.shared.location.replace(this.configuration.code.baseDirectory, '..'))),
+            ...serviceCode.map(code => generateImport(code.shared.name, '..' + code.shared.location.split(this.configuration.code.baseDirectory)[1])),
             generateClientMapping(serviceCode)
         ].map(n => printer.printNode(EmitHint.Unspecified, n, file));
         this.writeFile(this.project.getClientFile(), clientOutput.join('\n'));
@@ -122,12 +122,8 @@ export class RpcCodeGenerator {
     }
 
     protected getNameOfClassFile(declaration: RpcServiceCodeLocation<ClassDeclaration>): string {
-        return './' + declaration.location.split([
-            this.configuration.code.baseDirectory,
-            '/',
-            this.configuration.code.serverDirectory,
-            '/'
-        ].join(''))[1];
+        const split = declaration.location.split('/');
+        return split[split.length - 1];
     }
 }
 
