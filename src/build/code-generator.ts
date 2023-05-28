@@ -5,6 +5,7 @@ import {generateImport} from "./generate-import.fn";
 import {hasRpcDecorator} from "./has-rpc-decorator.fn";
 import {generateServerClass} from "./generate-server-class.fn";
 import {JsrpcConfig} from "../export/jsrpc-config";
+import {JsrpcProject} from "./jsrpc-project";
 
 const fs = require('fs');
 
@@ -20,9 +21,11 @@ const SERVER_PACKAGE_NAME = '@philippkoch/jsrpc/server';
 export class RpcCodeGenerator {
 
     protected program: Program;
+    protected configuration: JsrpcConfig;
 
-    public constructor(protected configuration: JsrpcConfig) {
-        this.program = ts.createProgram(this.getSharedFiles().concat(this.getServerFiles()), {
+    public constructor(protected project: JsrpcProject) {
+        this.configuration = project.configuration;
+        this.program = ts.createProgram(project.getServerFiles().concat(project.getSharedFiles()), {
             noEmitOnError: true,
             noImplicitAny: true,
             target: ts.ScriptTarget.ES5,
@@ -32,22 +35,6 @@ export class RpcCodeGenerator {
 
     public writeFile(fileName: string, content: string): void {
         fs.writeFileSync(fileName, content);
-    }
-
-    public getSharedFiles(): string[] {
-        return fs.readdirSync([this.configuration.code.baseDirectory, this.configuration.code.sharedDirectory].join('/')).map((f: string) => [
-            this.configuration.code.baseDirectory,
-            this.configuration.code.sharedDirectory,
-            f
-        ].join('/'));
-    }
-
-    public getServerFiles(): string[] {
-        return fs.readdirSync([this.configuration.code.baseDirectory, this.configuration.code.serverDirectory].join('/')).map((f: string) => [
-            this.configuration.code.baseDirectory,
-            this.configuration.code.serverDirectory,
-            f
-        ].join('/'));
     }
 
     public generate(): void {
@@ -115,11 +102,7 @@ export class RpcCodeGenerator {
             ...uniqueServerClasses.map(declaration => generateImport(declaration.code.name, this.getNameOfClassFile(declaration.code))),
             generateServerClass(uniqueServerClasses)
         ].map(n => printer.printNode(EmitHint.Unspecified, n, file));
-        this.writeFile([
-            this.configuration.code.baseDirectory,
-            this.configuration.code.serverDirectory,
-            this.configuration.code.serverFileName
-        ].join('/'), serverOutput.join('\n'));
+        this.writeFile(this.project.getServerFile(), serverOutput.join('\n'));
 
         const clientOutput = [
             generateImport(rpcServiceMappingInterfaceName, PACKAGE_NAME),
@@ -127,11 +110,7 @@ export class RpcCodeGenerator {
             ...serviceCode.map(code => generateImport(code.shared.name, code.shared.location.replace(this.configuration.code.baseDirectory, '..'))),
             generateClientMapping(serviceCode)
         ].map(n => printer.printNode(EmitHint.Unspecified, n, file));
-        this.writeFile([
-            this.configuration.code.baseDirectory,
-            this.configuration.code.clientDirectory,
-            this.configuration.code.clientFileName
-        ].join('/'), clientOutput.join('\n'));
+        this.writeFile(this.project.getClientFile(), clientOutput.join('\n'));
 
         console.log('#########################################');
         console.log('The following services will be available:');

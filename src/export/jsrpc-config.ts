@@ -21,7 +21,6 @@ export class JsrpcConfigValidator {
             return config;
         }
         JsrpcConfigValidator.assign(obj, config);
-        console.log(config);
         return config;
     }
 
