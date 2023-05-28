@@ -4,6 +4,7 @@ import {generateClientMapping} from "./generate-client-mapping.fn";
 import {generateImport} from "./generate-import.fn";
 import {hasRpcDecorator} from "./has-rpc-decorator.fn";
 import {generateServerClass} from "./generate-server-class.fn";
+import {JsrpcConfig} from "../export/jsrpc-config";
 
 const fs = require('fs');
 
@@ -15,21 +16,12 @@ export const rpcDecoratorName = 'rpc';
 
 const PACKAGE_NAME = '@philippkoch/jsrpc';
 const SERVER_PACKAGE_NAME = '@philippkoch/jsrpc/server';
-const SERVER_CLASS_FILE_NAME = 'server.jsrpc.ts';
-const CLIENT_CLASS_FILE_NAME = 'client.jsrpc.ts';
-
-interface RpcCodeGeneratorOptions {
-    baseDirectory: string;
-    sharedDirectory: string;
-    clientDirectory: string;
-    serverDirectory: string;
-}
 
 export class RpcCodeGenerator {
 
     protected program: Program;
 
-    public constructor(protected options: RpcCodeGeneratorOptions) {
+    public constructor(protected configuration: JsrpcConfig) {
         this.program = ts.createProgram(this.getSharedFiles().concat(this.getServerFiles()), {
             noEmitOnError: true,
             noImplicitAny: true,
@@ -43,17 +35,17 @@ export class RpcCodeGenerator {
     }
 
     public getSharedFiles(): string[] {
-        return fs.readdirSync([this.options.baseDirectory, this.options.sharedDirectory].join('/')).map((f: string) => [
-            this.options.baseDirectory,
-            this.options.sharedDirectory,
+        return fs.readdirSync([this.configuration.code.baseDirectory, this.configuration.code.sharedDirectory].join('/')).map((f: string) => [
+            this.configuration.code.baseDirectory,
+            this.configuration.code.sharedDirectory,
             f
         ].join('/'));
     }
 
     public getServerFiles(): string[] {
-        return fs.readdirSync([this.options.baseDirectory, this.options.serverDirectory].join('/')).map((f: string) => [
-            this.options.baseDirectory,
-            this.options.serverDirectory,
+        return fs.readdirSync([this.configuration.code.baseDirectory, this.configuration.code.serverDirectory].join('/')).map((f: string) => [
+            this.configuration.code.baseDirectory,
+            this.configuration.code.serverDirectory,
             f
         ].join('/'));
     }
@@ -106,7 +98,7 @@ export class RpcCodeGenerator {
             }
         })
 
-        let file = ts.createSourceFile(SERVER_CLASS_FILE_NAME, "", ts.ScriptTarget.ES2015);
+        let file = ts.createSourceFile(this.configuration.code.serverFileName, "", ts.ScriptTarget.ES2015);
 
         const uniqueServerClasses: RpcServerClassMapping[] = [];
         for (const declaration of serviceCode.map(code => code.server)) {
@@ -124,21 +116,21 @@ export class RpcCodeGenerator {
             generateServerClass(uniqueServerClasses)
         ].map(n => printer.printNode(EmitHint.Unspecified, n, file));
         this.writeFile([
-            this.options.baseDirectory,
-            this.options.serverDirectory,
-            SERVER_CLASS_FILE_NAME
+            this.configuration.code.baseDirectory,
+            this.configuration.code.serverDirectory,
+            this.configuration.code.serverFileName
         ].join('/'), serverOutput.join('\n'));
 
         const clientOutput = [
             generateImport(rpcServiceMappingInterfaceName, PACKAGE_NAME),
             generateImport(rpcClientInterfaceName, PACKAGE_NAME),
-            ...serviceCode.map(code => generateImport(code.shared.name, code.shared.location.replace(this.options.baseDirectory, '..'))),
+            ...serviceCode.map(code => generateImport(code.shared.name, code.shared.location.replace(this.configuration.code.baseDirectory, '..'))),
             generateClientMapping(serviceCode)
         ].map(n => printer.printNode(EmitHint.Unspecified, n, file));
         this.writeFile([
-            this.options.baseDirectory,
-            this.options.clientDirectory,
-            CLIENT_CLASS_FILE_NAME
+            this.configuration.code.baseDirectory,
+            this.configuration.code.clientDirectory,
+            this.configuration.code.clientFileName
         ].join('/'), clientOutput.join('\n'));
 
         console.log('#########################################');
@@ -152,9 +144,9 @@ export class RpcCodeGenerator {
 
     protected getNameOfClassFile(declaration: RpcServiceCodeLocation<ClassDeclaration>): string {
         return './' + declaration.location.split([
-            this.options.baseDirectory,
+            this.configuration.code.baseDirectory,
             '/',
-            this.options.serverDirectory,
+            this.configuration.code.serverDirectory,
             '/'
         ].join(''))[1];
     }
