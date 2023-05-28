@@ -14,10 +14,12 @@ export class JsrpcProject {
         this.configuration = JsrpcConfigValidator.getConfig(JSON.parse(fs.readFileSync(path.resolve(this.dir, JsrpcProject.PROJECT_FILE_NAME))));
     }
 
-    public static init(): JsrpcProject {
+    public static init(validate = true): JsrpcProject {
         const project = new JsrpcProject(JsrpcProject.findProjectFile(process.cwd()));
 
-        JsrpcProject.validate(project);
+        if (validate) {
+            JsrpcProject.validate(project);
+        }
 
         return project;
     }
