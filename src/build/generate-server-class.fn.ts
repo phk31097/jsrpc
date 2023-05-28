@@ -1,12 +1,14 @@
 import ts from "typescript";
 import {RpcServerClassMapping} from "./code-generator";
+import {JsrpcProject} from "./jsrpc-project";
 
 export function generateServerClass(
-    classDeclarations: RpcServerClassMapping[]
+    classDeclarations: RpcServerClassMapping[],
+    project: JsrpcProject
 ): ts.ExpressionStatement {
     const portArgument = ts.factory.createObjectLiteralExpression([
-        ts.factory.createPropertyAssignment("port", ts.factory.createNumericLiteral("3000")),
-        ts.factory.createPropertyAssignment("host", ts.factory.createStringLiteral("http://localhost")),
+        ts.factory.createPropertyAssignment("port", ts.factory.createNumericLiteral(project.configuration.server.port)),
+        ts.factory.createPropertyAssignment("host", ts.factory.createStringLiteral(project.configuration.server.host)),
     ]);
 
     const serviceInstantiations = classDeclarations.map((classDeclaration) =>
