@@ -32,7 +32,10 @@ export function generateServerClass(
     const rpcServerInstantiation = ts.factory.createNewExpression(
         ts.factory.createIdentifier("RpcServer"),
         undefined,
-        [jsrpcProjectInit, servicesArray]
+        [
+            ts.factory.createPropertyAccessExpression(jsrpcProjectInit, ts.factory.createIdentifier('server')),
+            servicesArray
+        ]
     );
 
     const listenMethodCall = ts.factory.createCallExpression(
