@@ -99,6 +99,7 @@ export class RpcCodeGenerator {
 
         const serverOutput = [
             generateImport(rpcServerClassName, SERVER_PACKAGE_NAME),
+            generateImport('config', '../../' + JsrpcProject.PROJECT_FILE_NAME, true), // FIXME relative paths
             ...uniqueServerClasses.map(declaration => generateImport(declaration.code.name, './' + this.getNameOfClassFile(declaration.code))),
             generateServerClass(uniqueServerClasses, this.project)
         ].map(n => printer.printNode(EmitHint.Unspecified, n, file));

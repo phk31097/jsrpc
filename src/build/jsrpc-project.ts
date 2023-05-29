@@ -54,7 +54,11 @@ export class JsrpcProject {
     }
 
     public startServer(): void {
-        tsNode.register();
+        tsNode.register({
+            compilerOptions: {
+                resolveJsonModule: true
+            }
+        });
         require(path.resolve(this.dir,
             this.configuration.code.baseDirectory,
             this.configuration.code.serverDirectory,

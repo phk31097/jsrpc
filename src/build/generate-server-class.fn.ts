@@ -6,11 +6,6 @@ export function generateServerClass(
     classDeclarations: RpcServerClassMapping[],
     project: JsrpcProject
 ): ts.ExpressionStatement {
-    const portArgument = ts.factory.createObjectLiteralExpression([
-        ts.factory.createPropertyAssignment("port", ts.factory.createNumericLiteral(project.configuration.server.port)),
-        ts.factory.createPropertyAssignment("host", ts.factory.createStringLiteral(project.configuration.server.host)),
-    ]);
-
     const serviceInstantiations = classDeclarations.map((classDeclaration) =>
         ts.factory.createObjectLiteralExpression([
             ts.factory.createPropertyAssignment("listensTo", ts.factory.createArrayLiteralExpression(
@@ -25,7 +20,7 @@ export function generateServerClass(
     const rpcServerInstantiation = ts.factory.createNewExpression(
         ts.factory.createIdentifier("RpcServer"),
         undefined,
-        [portArgument, servicesArray]
+        [ts.factory.createIdentifier('config'), servicesArray]
     );
 
     const listenMethodCall = ts.factory.createCallExpression(
