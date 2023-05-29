@@ -14,6 +14,7 @@ export const rpcServiceInterfaceName = 'RpcService';
 export const rpcClientInterfaceName = 'RpcClient';
 export const rpcServiceMappingInterfaceName = 'RpcServiceMapping';
 export const rpcDecoratorName = 'rpc';
+export const jsrpcProjectName = 'JsrpcProject';
 
 const PACKAGE_NAME = '@philippkoch/jsrpc';
 const SERVER_PACKAGE_NAME = '@philippkoch/jsrpc/server';
@@ -99,7 +100,7 @@ export class RpcCodeGenerator {
 
         const serverOutput = [
             generateImport(rpcServerClassName, SERVER_PACKAGE_NAME),
-            generateImport('config', '../../' + JsrpcProject.PROJECT_FILE_NAME, true), // FIXME relative paths
+            generateImport(jsrpcProjectName, SERVER_PACKAGE_NAME),
             ...uniqueServerClasses.map(declaration => generateImport(declaration.code.name, './' + this.getNameOfClassFile(declaration.code))),
             generateServerClass(uniqueServerClasses, this.project)
         ].map(n => printer.printNode(EmitHint.Unspecified, n, file));

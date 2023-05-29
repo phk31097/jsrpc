@@ -17,10 +17,22 @@ export function generateServerClass(
 
     const servicesArray = ts.factory.createArrayLiteralExpression(serviceInstantiations);
 
+    const jsrpcProjectInit = ts.factory.createPropertyAccessExpression(
+        ts.factory.createCallExpression(
+            ts.factory.createPropertyAccessExpression(
+                ts.factory.createIdentifier('JsrpcProject'),
+                ts.factory.createIdentifier('init')
+            ),
+            undefined,
+            []
+        ),
+        ts.factory.createIdentifier('configuration')
+    );
+
     const rpcServerInstantiation = ts.factory.createNewExpression(
         ts.factory.createIdentifier("RpcServer"),
         undefined,
-        [ts.factory.createIdentifier('config'), servicesArray]
+        [jsrpcProjectInit, servicesArray]
     );
 
     const listenMethodCall = ts.factory.createCallExpression(
