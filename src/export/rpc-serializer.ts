@@ -15,7 +15,7 @@ export interface RpcSerializedObject {
 }
 
 export class RpcSerializer {
-    protected static counter = 0;
+    protected counter = 0;
 
     public static getSerializedObject(obj: any): RpcSerializedObject {
         const responseObject: RpcSerializedObject = {
@@ -23,13 +23,15 @@ export class RpcSerializer {
             objects: [],
         };
 
-        responseObject.main = RpcSerializer.serialize(obj, responseObject);
+        const serializer = new RpcSerializer();
+
+        responseObject.main = serializer.serialize(obj, responseObject);
         responseObject.objects.forEach(o => {delete o.value.$key});
 
         return responseObject;
     }
 
-    protected static serialize(obj: any, response: RpcSerializedObject): RpcResponseType | RpcResponseType[] {
+    protected serialize(obj: any, response: RpcSerializedObject): RpcResponseType | RpcResponseType[] {
         if (RpcSerializer.isResponseVariable(obj)) {
             return {$key: obj.$key};
         }
@@ -37,9 +39,9 @@ export class RpcSerializer {
             obj.$key = `key${this.counter++}`;
             const serializedObject: {[index: string]: RpcResponseType | RpcResponseType[]} = {};
             for (const key in obj) {
-                serializedObject[key] = RpcSerializer.serialize(obj[key], response);
+                serializedObject[key] = this.serialize(obj[key], response);
             }
-            const objectKey = RpcSerializer.findObject(serializedObject, response);
+            const objectKey = this.findObject(serializedObject, response);
             if (objectKey) {
                 return {$key: objectKey.key};
             } else {
@@ -51,8 +53,8 @@ export class RpcSerializer {
         return obj;
     }
 
-    protected static findObject(obj: {[index: string]: any}, response: RpcSerializedObject): RpcResponseObject | undefined {
-        return response.objects.find(responseObject => this.objectEquals(obj, responseObject.value));
+    protected findObject(obj: {[index: string]: any}, response: RpcSerializedObject): RpcResponseObject | undefined {
+        return response.objects.find(responseObject => RpcSerializer.objectEquals(obj, responseObject.value));
     }
 
     public static objectEquals(lhs: any, rhs: any): boolean {
@@ -73,6 +75,10 @@ export class RpcSerializer {
                 }
             }
             return true;
+        }
+
+        if (!this.isObject(lhs) || !this.isObject(rhs)) {
+            return false;
         }
 
         const lhsKeys = Object.keys(lhs);
