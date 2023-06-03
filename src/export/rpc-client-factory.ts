@@ -1,6 +1,7 @@
 import {RpcServiceMapping} from "./rpc-service-mapping";
 import {RpcServerConfiguration} from "./rpc-server-configuration";
 import {RpcDeserializer} from "./rpc-deserializer";
+import {RpcSerializer} from "./rpc-serializer";
 
 export class RpcClientFactory {
 
@@ -27,7 +28,16 @@ export class RpcClientFactory {
         return new Promise((resolve, reject) => {
             console.log(`Call to ${serviceName}#${methodName}`);
             console.log(`Parameters: ${args}`);
-            fetch(`${this.config.host}:${this.config.port}/${serviceName}%${methodName}?${args.map((value, index) => `p${index}=${value}`).join('&')}`)
+            const url = `${this.config.host}:${this.config.port}/${serviceName}%${methodName}`;
+            fetch(url, {
+                method: 'POST',
+                mode: 'same-origin',
+                cache: 'no-cache',
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(RpcSerializer.getSerializedObject(args))
+            })
                 .then(response => response.json())
                 .then(data => resolve(RpcDeserializer.getObject(data)))
                 .catch(e => reject(e));

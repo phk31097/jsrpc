@@ -10,22 +10,29 @@ export class RpcServer {
 
     constructor(private config: RpcServerConfiguration, private services: RpcServiceConfiguration<any>[]) {
         this.server = http.createServer((req: IncomingMessage, res: ServerResponse) => {
-            try {
-                const match = new RpcRequestMatcher(this.services).match(req.url!);
+            let body = '';
+            req.on('data', (chunk) => {
+                body += chunk;
+            });
+            req.on('end', () => {
+                try {
+                    console.log(body);
+                    const match = new RpcRequestMatcher(this.services).match(req.url!, JSON.parse(body));
 
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                const response = RpcSerializer.getResponse((match.service[match.method] as Function)(...match.args));
-                res.write(JSON.stringify(response));
-            } catch (e: any) {
-                res.writeHead(400, { 'Content-Type': 'application/json' });
-                if ('message' in e) {
-                    res.write(JSON.stringify({error: e.message}));
-                } else {
-                    res.write(JSON.stringify({error: 'Unknown error'}));
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    const response = RpcSerializer.getSerializedObject((match.service[match.method] as Function)(...match.args));
+                    res.write(JSON.stringify(response));
+                } catch (e: any) {
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    if ('message' in e) {
+                        res.write(JSON.stringify({error: e.message}));
+                    } else {
+                        res.write(JSON.stringify({error: 'Unknown error'}));
+                    }
                 }
-            }
 
-            res.end();
+                res.end();
+            });
         })
     }
 

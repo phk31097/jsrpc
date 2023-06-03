@@ -17,7 +17,7 @@ export interface RpcSerializedObject {
 export class RpcSerializer {
     protected static counter = 0;
 
-    public static getResponse(obj: any): RpcSerializedObject {
+    public static getSerializedObject(obj: any): RpcSerializedObject {
         const responseObject: RpcSerializedObject = {
             main: null,
             objects: [],
