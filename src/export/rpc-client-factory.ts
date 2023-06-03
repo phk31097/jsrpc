@@ -24,7 +24,7 @@ export class RpcClientFactory {
         }) as T;
     }
 
-    protected performRequest(serviceName: string, methodName: string, ...args: any[]): Promise<any> {
+    protected performRequest(serviceName: string, methodName: string, args: any[]): Promise<any> {
         return new Promise((resolve, reject) => {
             console.log(`Call to ${serviceName}#${methodName}`);
             console.log(`Parameters: ${args}`);
