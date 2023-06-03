@@ -1,6 +1,6 @@
-type RpcResponseType = string | number | boolean | RpcResponseVariable;
+export type RpcResponseType = string | number | boolean | RpcResponseVariable;
 
-interface RpcResponseObject {
+export interface RpcResponseObject {
     key: string;
     value: {[index: string]: RpcResponseType | RpcResponseType[]}
 }
@@ -9,27 +9,27 @@ export interface RpcResponseVariable {
     $key: string;
 }
 
-export interface RpcSerializedResponse {
-    response: any;
+export interface RpcSerializedObject {
+    main: any;
     objects: RpcResponseObject[];
 }
 
 export class RpcSerializer {
     protected static counter = 0;
 
-    public static getResponse(obj: any): RpcSerializedResponse {
-        const responseObject: RpcSerializedResponse = {
-            response: null,
+    public static getResponse(obj: any): RpcSerializedObject {
+        const responseObject: RpcSerializedObject = {
+            main: null,
             objects: [],
         };
 
-        responseObject.response = RpcSerializer.serialize(obj, responseObject);
+        responseObject.main = RpcSerializer.serialize(obj, responseObject);
         responseObject.objects.forEach(o => {delete o.value.$key});
 
         return responseObject;
     }
 
-    protected static serialize(obj: any, response: RpcSerializedResponse): RpcResponseType | RpcResponseType[] {
+    protected static serialize(obj: any, response: RpcSerializedObject): RpcResponseType | RpcResponseType[] {
         if (RpcSerializer.isResponseVariable(obj)) {
             return {$key: obj.$key};
         }
@@ -51,7 +51,7 @@ export class RpcSerializer {
         return obj;
     }
 
-    protected static findObject(obj: {[index: string]: any}, response: RpcSerializedResponse): RpcResponseObject | undefined {
+    protected static findObject(obj: {[index: string]: any}, response: RpcSerializedObject): RpcResponseObject | undefined {
         return response.objects.find(responseObject => this.objectEquals(obj, responseObject.value));
     }
 
@@ -95,7 +95,7 @@ export class RpcSerializer {
     }
 
     protected static registerObject(obj: {[index: string]: RpcResponseType | RpcResponseType[]},
-                                    response: RpcSerializedResponse,
+                                    response: RpcSerializedObject,
                                     key: string): RpcResponseVariable {
         response.objects.push({key, value: obj});
         return {$key: key};

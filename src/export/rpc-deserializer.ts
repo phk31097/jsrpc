@@ -1,11 +1,11 @@
-import {RpcResponseVariable, RpcSerializedResponse, RpcSerializer} from "./rpc-serializer";
+import {RpcResponseVariable, RpcSerializedObject, RpcSerializer} from "./rpc-serializer";
 
 export class RpcDeserializer {
-    public static getObject(response: RpcSerializedResponse): any {
-        return this.deserialize(response.response, response)
+    public static getObject(response: RpcSerializedObject): any {
+        return this.deserialize(response.main, response)
     }
 
-    protected static deserialize(variable: RpcResponseVariable | RpcResponseVariable[], response: RpcSerializedResponse): any {
+    protected static deserialize(variable: RpcResponseVariable | RpcResponseVariable[], response: RpcSerializedObject): any {
         if (Array.isArray(variable)) {
             return variable.map(v => this.deserialize(v, response));
         }
@@ -18,7 +18,7 @@ export class RpcDeserializer {
         return result;
     }
 
-    protected static findByKey(key: string, response: RpcSerializedResponse): any {
+    protected static findByKey(key: string, response: RpcSerializedObject): any {
         const result = response.objects.find(item => item.key === key);
         if (result) {
             return result.value;
