@@ -1,5 +1,6 @@
-import {describe, test, expect} from "@jest/globals";
+import {describe, expect, test} from "@jest/globals";
 import {RpcSerializer} from "./rpc-serializer";
+import {RpcDeserializer} from "./rpc-deserializer";
 
 describe('RPC Serializer', () => {
     test('should serialize a string', () => {
@@ -22,15 +23,21 @@ describe('RPC Serializer', () => {
     });
 
     test('should serialize an object array', () => {
-        const obj = [{x: 0, y: 15}, {x: 15, y: 0}];
+        const obj = [
+                {
+                    name: 'Seminar',
+                    description: 'We develop things here',
+                    lecturer: 'Hagino & Hattori'
+                },
+                {
+                    name: 'Internet',
+                    description: 'You can learn cool things about the internet',
+                    lecturer: 'Murai'
+                },
+                { description: 'asdf', lecturer: 'me', name: 'Added course' }
+            ]
+        ;
         const result = RpcSerializer.getSerializedObject(obj);
-        expect(result.objects).toEqual([
-            {key: 'key0', value: {x: 0, y: 15}},
-            {key: 'key1', value: {x: 15, y: 0}},
-        ]);
-        expect(result.main).toEqual([
-            {$key: 'key0'},
-            {$key: 'key1'},
-        ]);
+        expect(RpcDeserializer.getObject(result)).toEqual(obj);
     });
 });

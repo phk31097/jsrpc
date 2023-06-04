@@ -26,7 +26,6 @@ export class RpcSerializer {
         const serializer = new RpcSerializer();
 
         responseObject.main = serializer.serialize(obj, responseObject);
-        responseObject.objects.forEach(o => {delete o.value.$key});
 
         return responseObject;
     }
@@ -36,7 +35,8 @@ export class RpcSerializer {
             return {$key: obj.$key};
         }
         if (RpcSerializer.isObject(obj)) {
-            obj.$key = `key${this.counter++}`;
+            const objKey = `key${this.counter++}`;
+            obj.$key = objKey;
             const serializedObject: {[index: string]: RpcResponseType | RpcResponseType[]} = {};
             for (const key in obj) {
                 serializedObject[key] = this.serialize(obj[key], response);
@@ -45,7 +45,9 @@ export class RpcSerializer {
             if (objectKey) {
                 return {$key: objectKey.key};
             } else {
-                return RpcSerializer.registerObject(serializedObject, response, obj.$key);
+                delete obj.$key;
+                delete serializedObject.$key;
+                return RpcSerializer.registerObject(serializedObject, response, objKey);
             }
         } else if (Array.isArray(obj)) {
             return obj.map(item => this.serialize(item, response) as RpcResponseType);
