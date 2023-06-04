@@ -70,15 +70,18 @@ export class JsrpcProject {
     }
 
     public getSharedFiles(): string[] {
-        return fs.readdirSync(this.pathInBasePath(this.configuration.code.sharedDirectory));
+        return fs.readdirSync(this.pathInBasePath(this.configuration.code.sharedDirectory))
+            .map((file: string) => this.pathInBasePath(this.configuration.code.sharedDirectory, file));
     }
 
     public getServerFiles(): string[] {
-        return fs.readdirSync(this.pathInBasePath(this.configuration.code.serverDirectory));
+        return fs.readdirSync(this.pathInBasePath(this.configuration.code.serverDirectory))
+            .map((file: string) => this.pathInBasePath(this.configuration.code.serverDirectory, file));
     }
 
     public getClientFiles(): string[] {
-        return fs.readdirSync(this.pathInBasePath(this.configuration.code.clientDirectory));
+        return fs.readdirSync(this.pathInBasePath(this.configuration.code.clientDirectory))
+            .map((file: string) => this.pathInBasePath(this.configuration.code.clientDirectory, file));
     }
 
     public getServerFile(): string {

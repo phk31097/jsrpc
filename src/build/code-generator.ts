@@ -26,6 +26,7 @@ export class RpcCodeGenerator {
 
     public constructor(protected project: JsrpcProject) {
         this.configuration = project.configuration;
+        console.log(project.getServerFiles().concat(project.getSharedFiles()));
         this.program = ts.createProgram(project.getServerFiles().concat(project.getSharedFiles()), {
             noEmitOnError: true,
             noImplicitAny: true,
