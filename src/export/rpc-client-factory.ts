@@ -7,19 +7,15 @@ export class RpcClientFactory {
 
     constructor(protected config: RpcServerConfiguration) {}
 
-    public getClient<T extends RpcServiceMapping>(): T {
+    public getClient<T extends RpcServiceMapping>(serviceName: keyof T): T {
         const factory = this;
         return new Proxy({}, {
-            get(_1, serviceName){
-                return new Proxy({}, {
-                    get(_2, methodName) {
-                        return (...args: any[]) => {
-                            console.log(serviceName)
-                            console.log(methodName);
-                            return factory.performRequest(String(serviceName), String(methodName), args);
-                        }
-                    }
-                })
+            get(_2, methodName) {
+                return (...args: any[]) => {
+                    console.log(serviceName)
+                    console.log(methodName);
+                    return factory.performRequest(String(serviceName), String(methodName), args);
+                }
             }
         }) as T;
     }
