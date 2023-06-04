@@ -42,12 +42,12 @@ export class RpcSerializer {
             for (const key in obj) {
                 serializedObject[key] = this.serialize(obj[key], response);
             }
+            delete obj[RpcSerializer.TRAVERSED_KEY];
+            delete serializedObject[RpcSerializer.TRAVERSED_KEY];
             const objectKey = this.findObject(serializedObject, response);
             if (objectKey) {
                 return {$key: objectKey.key};
             } else {
-                delete obj[RpcSerializer.TRAVERSED_KEY];
-                delete serializedObject[RpcSerializer.TRAVERSED_KEY];
                 return RpcSerializer.registerObject(serializedObject, response, objKey);
             }
         } else if (Array.isArray(obj)) {

@@ -34,11 +34,18 @@ describe('RPC Serializer', () => {
                     description: 'You can learn cool things about the internet',
                     lecturer: 'Murai'
                 },
+                { description: 'asdf', lecturer: 'me', name: 'Added course' },
                 { description: 'asdf', lecturer: 'me', name: 'Added course' }
             ]
         ;
         const objCopy = JSON.parse(JSON.stringify(obj));
         const result = RpcSerializer.getSerializedObject(obj);
+        expect(result.main).toEqual([
+            {$key: 'key0'},
+            {$key: 'key1'},
+            {$key: 'key2'},
+            {$key: 'key2'},
+        ]);
         expect(RpcDeserializer.getObject(result)).toEqual(objCopy);
     });
 });
