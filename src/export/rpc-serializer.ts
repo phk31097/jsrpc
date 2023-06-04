@@ -15,6 +15,7 @@ export interface RpcSerializedObject {
 }
 
 export class RpcSerializer {
+    protected static TRAVERSED_KEY = '__traversed';
     protected counter = 0;
 
     public static getSerializedObject(obj: any): RpcSerializedObject {
@@ -36,7 +37,7 @@ export class RpcSerializer {
         }
         if (RpcSerializer.isObject(obj)) {
             const objKey = `key${this.counter++}`;
-            obj.$key = objKey;
+            obj[RpcSerializer.TRAVERSED_KEY] = objKey;
             const serializedObject: {[index: string]: RpcResponseType | RpcResponseType[]} = {};
             for (const key in obj) {
                 serializedObject[key] = this.serialize(obj[key], response);
@@ -45,8 +46,8 @@ export class RpcSerializer {
             if (objectKey) {
                 return {$key: objectKey.key};
             } else {
-                delete obj.$key;
-                delete serializedObject.$key;
+                delete obj[RpcSerializer.TRAVERSED_KEY];
+                delete serializedObject[RpcSerializer.TRAVERSED_KEY];
                 return RpcSerializer.registerObject(serializedObject, response, objKey);
             }
         } else if (Array.isArray(obj)) {

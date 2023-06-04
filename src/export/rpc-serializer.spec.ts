@@ -37,7 +37,8 @@ describe('RPC Serializer', () => {
                 { description: 'asdf', lecturer: 'me', name: 'Added course' }
             ]
         ;
+        const objCopy = JSON.parse(JSON.stringify(obj));
         const result = RpcSerializer.getSerializedObject(obj);
-        expect(RpcDeserializer.getObject(result)).toEqual(obj);
+        expect(RpcDeserializer.getObject(result)).toEqual(objCopy);
     });
 });
