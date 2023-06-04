@@ -8,8 +8,8 @@ export class RpcClientFactory {
     constructor(protected config: RpcServerConfiguration) {}
 
     public getClient<T extends RpcServiceMapping,K extends keyof T>(arg0: string) {
+        const factory = this;
         const dummyFnForTypeInference = function <K extends keyof T>(serviceName: K): T[K] {
-            const factory = this;
             return new Proxy({}, {
                 get(_2, methodName) {
                     return (...args: any[]) => {
