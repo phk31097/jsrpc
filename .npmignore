@@ -1,3 +1,5 @@
 *.tsx
+*.spec.ts
+*.spec.js
 node_modules/
 
