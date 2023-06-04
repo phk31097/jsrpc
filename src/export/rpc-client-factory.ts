@@ -20,7 +20,7 @@ export class RpcClientFactory {
                 }
             }) as T[K];
         }
-        return dummyFnForTypeInference(arg0);
+        return dummyFnForTypeInference(arg0 as keyof T);
     }
 
     protected performRequest(serviceName: string, methodName: string, args: any[]): Promise<any> {
