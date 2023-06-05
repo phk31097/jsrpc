@@ -31,7 +31,6 @@ export class RpcClientFactory {
             const url = `${this.config.host}:${this.config.port}/${serviceName}%${methodName}`;
             fetch(url, {
                 method: 'POST',
-                mode: 'same-origin',
                 cache: 'no-cache',
                 headers: {
                     "Content-Type": "application/json",
