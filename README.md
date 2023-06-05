@@ -41,7 +41,8 @@ JSRPC provides an effortless way to enable client-backend communication for appl
            host: 'http://localhost',
            port: 3000
        })
-       .getClient<ServiceMapping>('MyService')
+       .getClient<ServiceMapping>()
+       .MyService
        .helloWorld()
        .then(message => alert(message));
    ```
