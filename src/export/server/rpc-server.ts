@@ -11,7 +11,8 @@ export class RpcServer {
     constructor(private config: RpcServerConfiguration, private services: RpcServiceConfiguration<any>[]) {
         this.server = http.createServer((req: IncomingMessage, res: ServerResponse) => {
             res.setHeader('Access-Control-Allow-Origin', '*');
-            res.setHeader('Access-Control-Allow-Methods', 'POST');
+            res.setHeader('Access-Control-Request-Method', '*');
+            res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, POST');
             res.setHeader('Access-Control-Allow-Headers', '*');
             let body = '';
             req.on('data', (chunk) => {
